@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { useContext, useState } from 'react';
 import { AppContext } from '../context/AppContext.jsx';
 import { Menu, X, Bell } from 'lucide-react';
+import { DataSourceBadge } from './DataSourceBadge.jsx';
 
 export function Navbar({ onMenuToggle }) {
   const { isConnected } = useContext(AppContext);
@@ -24,6 +25,9 @@ export function Navbar({ onMenuToggle }) {
 
         {/* Right side items */}
         <div className="flex items-center gap-4">
+          {/* Data source badge */}
+          <DataSourceBadge />
+
           {/* Status indicator */}
           <div className="flex items-center gap-2">
             <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`}></div>

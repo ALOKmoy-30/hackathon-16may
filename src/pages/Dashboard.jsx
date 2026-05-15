@@ -17,6 +17,12 @@ export function Dashboard() {
     { time: '20:00', temperature: 23 },
   ];
 
+  // Calculate KPI values
+  const totalSensors = sensors.length;
+  const activeAlerts = alerts.length;
+  const zones = new Set(sensors.map(s => s.location.split(' - ')[0])).size;
+  const lastUpdate = new Date().toLocaleTimeString();
+
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
       <h1 className="text-4xl font-bold mb-6">Dashboard</h1>
@@ -32,6 +38,26 @@ export function Dashboard() {
           ))}
         </div>
       )}
+
+      {/* KPI Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div className="bg-white rounded-lg shadow p-6">
+          <h3 className="text-gray-500 text-sm font-medium mb-2">Total Sensors</h3>
+          <p className="text-3xl font-bold text-gray-900">{totalSensors}</p>
+        </div>
+        <div className="bg-white rounded-lg shadow p-6">
+          <h3 className="text-gray-500 text-sm font-medium mb-2">Active Alerts</h3>
+          <p className="text-3xl font-bold text-red-600">{activeAlerts}</p>
+        </div>
+        <div className="bg-white rounded-lg shadow p-6">
+          <h3 className="text-gray-500 text-sm font-medium mb-2">Zones</h3>
+          <p className="text-3xl font-bold text-gray-900">{zones}</p>
+        </div>
+        <div className="bg-white rounded-lg shadow p-6">
+          <h3 className="text-gray-500 text-sm font-medium mb-2">Last Update</h3>
+          <p className="text-xl font-bold text-gray-900">{lastUpdate}</p>
+        </div>
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
         {loading ? (
