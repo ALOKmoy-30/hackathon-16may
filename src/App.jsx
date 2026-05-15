@@ -9,6 +9,8 @@ import { ControlPanel } from './pages/ControlPanel.jsx';
 import { Alerts } from './pages/Alerts.jsx';
 import './index.css';
 
+import { SystemLog } from './components/SystemLog.jsx';
+
 function AppContent() {
   useSocket();
 
@@ -21,6 +23,7 @@ function AppContent() {
         <Route path="/control" element={<ControlPanel />} />
         <Route path="/alerts" element={<Alerts />} />
       </Routes>
+      <SystemLog />
     </Layout>
   );
 }

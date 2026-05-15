@@ -1,24 +1,20 @@
-import { useState } from 'react';
+import { useState, useContext } from 'react';
 import { Navbar } from './Navbar.jsx';
 import { Sidebar } from './Sidebar.jsx';
+import { AppContext } from '../context/AppContext.jsx';
+import { LoadingSpinner } from './LoadingSpinner.jsx';
 
 export function Layout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-
-  const handleMenuToggle = (isOpen) => {
-    setSidebarOpen(isOpen);
-  };
-
-  const handleSidebarClose = () => {
-    setSidebarOpen(false);
-  };
+  const { loading } = useContext(AppContext);
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navbar onMenuToggle={handleMenuToggle} />
+    <div className="min-h-screen bg-black text-white">
+      {loading && <LoadingSpinner />}
+      <Navbar onMenuToggle={() => setSidebarOpen(!sidebarOpen)} />
       <div className="flex">
-        <Sidebar isOpen={sidebarOpen} onClose={handleSidebarClose} />
-        <main className="flex-1 overflow-auto">
+        <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+        <main className="flex-1 w-full overflow-x-hidden p-4 lg:p-6 pb-24 safe-area-inset-bottom">
           {children}
         </main>
       </div>

@@ -1,14 +1,32 @@
 import { useState, useContext } from 'react';
 import { AppContext } from '../context/AppContext.jsx';
 import { getTelegramStatus } from '../services/telegramService.js';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronDown, ChevronUp, Play, Square } from 'lucide-react';
+import { startStressTestSimulation, stopStressTestSimulation } from '../mock/mockData.js';
 
 export function ControlPanel() {
-  const { addAlert } = useContext(AppContext);
+  const { addAlert, setSensors, addLogEntry } = useContext(AppContext);
   const [systemStatus, setSystemStatus] = useState('normal');
   const [showTelegramInstructions, setShowTelegramInstructions] = useState(false);
+  const [isSimulating, setIsSimulating] = useState(false);
 
   const telegramStatus = getTelegramStatus();
+
+  const handleStartStressTest = () => {
+    setIsSimulating(true);
+    addLogEntry({ type: 'warning', message: 'Stress test simulation started: Fire spreading from Lab to Hallway.' });
+    startStressTestSimulation((newData) => {
+      setSensors(newData.sensors);
+      addLogEntry({ type: 'info', message: 'Simulation update received.', data: newData });
+    });
+  };
+
+  const handleStopStressTest = () => {
+    setIsSimulating(false);
+    const finalData = stopStressTestSimulation();
+    setSensors(finalData.sensors);
+    addLogEntry({ type: 'info', message: 'Stress test simulation stopped and reset.' });
+  };
 
   const handleTriggerEvacuation = () => {
     setSystemStatus('evacuation');
@@ -70,6 +88,32 @@ export function ControlPanel() {
             <button className="w-full bg-gray-500 text-white py-2 rounded-lg font-bold hover:bg-gray-600 transition">
               Call Emergency Services
             </button>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-lg shadow p-6">
+          <h2 className="text-2xl font-bold mb-4">Stress Test Simulator</h2>
+          <p className="text-sm text-gray-600 mb-4">
+            Simulates a fire spreading from the Lab to the Hallway over 30 seconds. Use this to test real-time monitoring and path rerouting.
+          </p>
+          <div className="space-y-3">
+            {!isSimulating ? (
+              <button
+                onClick={handleStartStressTest}
+                className="w-full flex items-center justify-center gap-2 bg-orange-600 text-white py-3 rounded-lg font-bold hover:bg-orange-700 transition"
+              >
+                <Play size={20} />
+                Start Fire Spread Simulation
+              </button>
+            ) : (
+              <button
+                onClick={handleStopStressTest}
+                className="w-full flex items-center justify-center gap-2 bg-slate-800 text-white py-3 rounded-lg font-bold hover:bg-slate-900 transition"
+              >
+                <Square size={20} />
+                Stop Simulation
+              </button>
+            )}
           </div>
         </div>
       </div>

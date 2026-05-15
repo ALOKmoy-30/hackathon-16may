@@ -4,69 +4,57 @@ import { AlertCircle } from 'lucide-react';
 export function SensorCard({ sensor }) {
   const getStatusColor = (status) => {
     switch (status) {
-      case 'DANGER':
-        return 'bg-red-100 border-red-500 text-red-900';
-      case 'WARNING':
-        return 'bg-yellow-100 border-yellow-500 text-yellow-900';
-      case 'NORMAL':
-        return 'bg-green-100 border-green-500 text-green-900';
-      default:
-        return 'bg-gray-100 border-gray-500 text-gray-900';
+      case 'DANGER': return 'text-red-500 danger-pulse';
+      case 'WARNING': return 'text-orange-500';
+      case 'NORMAL': return 'text-emerald-500';
+      default: return 'text-neutral-400';
     }
   };
 
-  const getStatusBadge = (status) => {
-    const colors = {
-      DANGER: 'bg-red-600 text-white',
-      WARNING: 'bg-yellow-600 text-white',
-      NORMAL: 'bg-green-600 text-white',
-    };
-    return colors[status] || 'bg-gray-600 text-white';
+  const getBadgeBg = (status) => {
+    switch (status) {
+      case 'DANGER': return 'bg-red-500 text-white shadow-[0_0_15px_rgba(239,68,68,0.4)]';
+      case 'WARNING': return 'bg-orange-500 text-white';
+      case 'NORMAL': return 'bg-emerald-500 text-black';
+      default: return 'bg-neutral-800 text-neutral-400';
+    }
   };
-
-  // Check if data is stale (older than 10 seconds)
-  const isDataStale = () => {
-    if (!sensor.lastUpdate) return false;
-    const lastUpdateTime = new Date(sensor.lastUpdate).getTime();
-    const currentTime = new Date().getTime();
-    const diffInSeconds = (currentTime - lastUpdateTime) / 1000;
-    return diffInSeconds > 10;
-  };
-
-  const dataStale = isDataStale();
 
   return (
-    <div className={`border-2 rounded-lg p-4 ${getStatusColor(sensor.status)} relative`}>
-      {/* Health Status Indicator */}
-      {dataStale && (
-        <div className="absolute top-2 right-2 flex items-center gap-1 bg-orange-500 text-white px-2 py-1 rounded text-xs font-bold">
-          <AlertCircle size={12} />
-          <span>Stale</span>
+    <div className="bg-neutral-900 rounded-3xl p-6 transition-all duration-300 hover:bg-neutral-800 group">
+      <div className="flex justify-between items-start mb-6">
+        <div>
+          <h3 className="font-black text-xl text-white tracking-tight group-hover:text-emerald-500 transition-colors">{sensor.name}</h3>
+          <p className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest mt-1">{sensor.location}</p>
         </div>
-      )}
-
-      <div className="flex justify-between items-start mb-2">
-        <h3 className="font-bold text-lg">{sensor.name}</h3>
-        <span className={`px-2 py-1 rounded text-xs font-bold ${getStatusBadge(sensor.status)}`}>
+        <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter ${getBadgeBg(sensor.status)}`}>
           {sensor.status}
         </span>
       </div>
-      <p className="text-sm mb-1">Location: {sensor.location}</p>
-      <p className="text-sm mb-1">Temperature: {sensor.temperature}°C</p>
-      <p className="text-sm mb-1">Smoke Level: {sensor.smokeLevel} ppm</p>
-      <p className="text-sm mb-1">Gas Level: {sensor.gasLevel} ppm</p>
-      <p className="text-sm mb-3">Humidity: {sensor.humidity}%</p>
 
-      {/* Sparkline chart */}
-      {sensor.history && sensor.history.length > 0 && (
-        <div className="mt-2 h-12">
+      <div className="grid grid-cols-2 gap-4 mb-8">
+        {[
+          { label: 'Thermal', value: `${sensor.temperature}°C` },
+          { label: 'Humidity', value: `${sensor.humidity}%` },
+          { label: 'Smoke', value: sensor.smokeLevel },
+          { label: 'Toxic Gas', value: sensor.gasLevel },
+        ].map((item, i) => (
+          <div key={i} className="bg-black/20 rounded-2xl p-4">
+            <p className="text-[9px] font-black text-neutral-500 uppercase tracking-widest mb-1">{item.label}</p>
+            <p className={`text-xl font-black tracking-tight ${getStatusColor(sensor.status)}`}>{item.value}</p>
+          </div>
+        ))}
+      </div>
+
+      {sensor.history && (
+        <div className="h-12 opacity-40 group-hover:opacity-100 transition-opacity">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={sensor.history}>
               <Line
                 type="monotone"
                 dataKey="value"
-                stroke={sensor.status === 'DANGER' ? '#dc2626' : sensor.status === 'WARNING' ? '#d97706' : '#16a34a'}
-                strokeWidth={2}
+                stroke={sensor.status === 'DANGER' ? '#EF4444' : '#10B981'}
+                strokeWidth={3}
                 dot={false}
               />
             </LineChart>

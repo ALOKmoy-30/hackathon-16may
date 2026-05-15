@@ -1,26 +1,28 @@
 // Data source switch - routes between mock data and real Telegram API
-import { mockSensorData } from '../mock/mockData.js';
+import { mockSensorData, startStressTestSimulation, stopStressTestSimulation, getInitialMockSensorData } from '../mock/mockData.js';
 import { fetchSensorData } from './telegramService.js';
 
 const USE_REAL_DATA = import.meta.env.VITE_USE_REAL_DATA === 'true';
 
 // Get sensor data from the appropriate source
-export async function getSensorData() {
+export async function getSensorData(onUpdate = null) {
   if (USE_REAL_DATA) {
     console.log('Fetching real data from Telegram API...');
     const realData = await fetchSensorData();
 
-    // If real data fetch fails, fall back to mock data
     if (!realData) {
       console.warn('Real data unavailable, falling back to mock data');
-      return mockSensorData;
+      return getInitialMockSensorData();
     }
 
     return realData;
   }
 
   console.log('Using mock data (demo mode)');
-  return mockSensorData;
+  if (onUpdate) {
+    startStressTestSimulation(onUpdate);
+  }
+  return getInitialMockSensorData();
 }
 
 // Get current data source mode
@@ -33,4 +35,4 @@ export function getDataSourceMode() {
 }
 
 // Export mock data for direct access if needed
-export { mockSensorData };
+export { mockSensorData, startStressTestSimulation, stopStressTestSimulation, getInitialMockSensorData };

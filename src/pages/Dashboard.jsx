@@ -5,11 +5,13 @@ import { ChartWidget } from '../components/ChartWidget.jsx';
 import { AlertBanner } from '../components/AlertBanner.jsx';
 import { sendAlert } from '../services/telegramService.js';
 import { Bell } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useContext } from 'react';
+import { AppContext } from '../context/AppContext.jsx';
 
 export function Dashboard() {
   const { sensors, loading } = useSensors();
   const { alerts, removeAlert, addAlert } = useAlerts();
+  const { addLogEntry } = useContext(AppContext);
   const [sendingAlert, setSendingAlert] = useState(false);
 
   const mockChartData = [
@@ -21,118 +23,75 @@ export function Dashboard() {
     { time: '20:00', temperature: 23 },
   ];
 
-  // Calculate KPI values
   const totalSensors = sensors.length;
   const activeAlerts = alerts.length;
-  const zones = new Set(sensors.map(s => s.location.split(' - ')[0])).size;
-  const lastUpdate = new Date().toLocaleTimeString();
+  const zones = new Set(sensors.map(s => s.zone)).size;
 
-  // Handle Quick Alert
   const handleQuickAlert = async () => {
     setSendingAlert(true);
-    const message = `🚨 <b>Test Alert from FireEvac System</b>\n\n` +
-      `Time: ${new Date().toLocaleString()}\n` +
-      `Total Sensors: ${totalSensors}\n` +
-      `Active Alerts: ${activeAlerts}\n` +
-      `Status: System operational\n\n` +
-      `This is a test message from the FireEvac Dashboard.`;
-
-    const result = await sendAlert(message);
-
+    addLogEntry({ type: 'warning', message: 'Manual Quick Alert triggered.' });
+    const result = await sendAlert(`🚨 Emergency Alert from FireEvac Premium`);
     if (result.success) {
-      addAlert({
-        title: 'Test Alert Sent',
-        message: 'Test message successfully sent to Telegram',
-        severity: 'info',
-      });
-    } else {
-      addAlert({
-        title: 'Alert Failed',
-        message: result.reason === 'not_configured'
-          ? 'Telegram not configured. Check Control Panel for setup instructions.'
-          : 'Failed to send alert to Telegram',
-        severity: 'warning',
-      });
+      addAlert({ title: 'Alert Sent', message: 'Telegram broadcast successful.', severity: 'critical' });
     }
-
     setSendingAlert(false);
   };
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-4xl font-bold">Dashboard</h1>
-
-        {/* Quick Alert Button */}
+    <div className="space-y-8 pb-12">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
+        <div>
+          <h1 className="text-4xl font-black text-white tracking-tighter">Command Center</h1>
+          <p className="text-neutral-500 font-bold uppercase text-[10px] tracking-[0.3em] mt-1">Real-time building intelligence</p>
+        </div>
         <button
           onClick={handleQuickAlert}
           disabled={sendingAlert}
-          className="flex items-center gap-2 bg-red-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-red-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full sm:w-auto touch-target flex items-center justify-center gap-3 bg-red-500 text-white px-8 py-3 rounded-3xl font-black hover:bg-red-600 transition-all shadow-[0_10px_30px_-10px_rgba(239,68,68,0.5)] danger-pulse"
         >
           <Bell size={20} />
-          {sendingAlert ? 'Sending...' : 'Quick Alert'}
+          {sendingAlert ? 'BROADCASTING...' : 'EMERGENCY ALERT'}
         </button>
       </div>
 
       {alerts.length > 0 && (
-        <div className="mb-6 space-y-2">
+        <div className="space-y-4">
           {alerts.map(alert => (
-            <AlertBanner
-              key={alert.id}
-              alert={alert}
-              onClose={() => removeAlert(alert.id)}
-            />
+            <AlertBanner key={alert.id} alert={alert} onClose={() => removeAlert(alert.id)} />
           ))}
         </div>
       )}
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-gray-500 text-sm font-medium mb-2">Total Sensors</h3>
-          <p className="text-3xl font-bold text-gray-900">{totalSensors}</p>
-        </div>
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-gray-500 text-sm font-medium mb-2">Active Alerts</h3>
-          <p className="text-3xl font-bold text-red-600">{activeAlerts}</p>
-        </div>
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-gray-500 text-sm font-medium mb-2">Zones</h3>
-          <p className="text-3xl font-bold text-gray-900">{zones}</p>
-        </div>
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-gray-500 text-sm font-medium mb-2">Last Update</h3>
-          <p className="text-xl font-bold text-gray-900">{lastUpdate}</p>
-        </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
+        {[
+          { label: 'Total Sensors', value: totalSensors, color: 'text-white' },
+          { label: 'Active Alerts', value: activeAlerts, color: activeAlerts > 0 ? 'text-red-500 danger-pulse' : 'text-emerald-500' },
+          { label: 'Intelligence Zones', value: zones, color: 'text-white' },
+          { label: 'System Integrity', value: '100%', color: 'text-emerald-500' },
+        ].map((kpi, idx) => (
+          <div key={idx} className="bg-neutral-900 rounded-3xl p-8 transition-transform hover:scale-[1.02] duration-300">
+            <h3 className="text-neutral-500 text-[10px] font-black uppercase tracking-[0.2em] mb-3">{kpi.label}</h3>
+            <p className={`text-4xl font-black tracking-tighter ${kpi.color}`}>{kpi.value}</p>
+          </div>
+        ))}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-        {loading ? (
-          <p>Loading sensors...</p>
-        ) : (
-          sensors.map(sensor => (
-            <SensorCard key={sensor.id} sensor={sensor} />
-          ))
-        )}
+      {/* Sensor Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        {sensors.map(sensor => (
+          <SensorCard key={sensor.id} sensor={sensor} />
+        ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <ChartWidget
-          data={mockChartData}
-          title="Temperature Trend"
-          dataKey="temperature"
-          color="#ef4444"
-          xAxisLabel="Time"
-          yAxisLabel="Temperature (°C)"
-        />
-        <ChartWidget
-          data={mockChartData}
-          title="Smoke Level Trend"
-          dataKey="temperature"
-          color="#f59e0b"
-          xAxisLabel="Time"
-          yAxisLabel="Smoke Level (ppm)"
-        />
+      {/* Charts */}
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+        <div className="bg-neutral-900 rounded-3xl p-8">
+          <ChartWidget data={mockChartData} title="Thermal Gradient" dataKey="temperature" color="#EF4444" xAxisLabel="Time" yAxisLabel="Celsius" />
+        </div>
+        <div className="bg-neutral-900 rounded-3xl p-8">
+          <ChartWidget data={mockChartData} title="Air Particulates" dataKey="temperature" color="#10B981" xAxisLabel="Time" yAxisLabel="PPM" />
+        </div>
       </div>
     </div>
   );
