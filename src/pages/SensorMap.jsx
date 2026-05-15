@@ -1,5 +1,5 @@
 import { useSensors } from '../hooks/useSensors.jsx';
-import { SensorCard } from '../components/SensorCard.jsx';
+import { FloorPlan } from '../components/FloorPlan.jsx';
 
 export function SensorMap() {
   const { sensors, loading } = useSensors();
@@ -11,11 +11,7 @@ export function SensorMap() {
       {loading ? (
         <p>Loading sensors...</p>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {sensors.map(sensor => (
-            <SensorCard key={sensor.id} sensor={sensor} />
-          ))}
-        </div>
+        <FloorPlan sensors={sensors} />
       )}
     </div>
   );

@@ -1,4 +1,5 @@
 import { LineChart, Line, ResponsiveContainer } from 'recharts';
+import { AlertCircle } from 'lucide-react';
 
 export function SensorCard({ sensor }) {
   const getStatusColor = (status) => {
@@ -23,8 +24,27 @@ export function SensorCard({ sensor }) {
     return colors[status] || 'bg-gray-600 text-white';
   };
 
+  // Check if data is stale (older than 10 seconds)
+  const isDataStale = () => {
+    if (!sensor.lastUpdate) return false;
+    const lastUpdateTime = new Date(sensor.lastUpdate).getTime();
+    const currentTime = new Date().getTime();
+    const diffInSeconds = (currentTime - lastUpdateTime) / 1000;
+    return diffInSeconds > 10;
+  };
+
+  const dataStale = isDataStale();
+
   return (
-    <div className={`border-2 rounded-lg p-4 ${getStatusColor(sensor.status)}`}>
+    <div className={`border-2 rounded-lg p-4 ${getStatusColor(sensor.status)} relative`}>
+      {/* Health Status Indicator */}
+      {dataStale && (
+        <div className="absolute top-2 right-2 flex items-center gap-1 bg-orange-500 text-white px-2 py-1 rounded text-xs font-bold">
+          <AlertCircle size={12} />
+          <span>Stale</span>
+        </div>
+      )}
+
       <div className="flex justify-between items-start mb-2">
         <h3 className="font-bold text-lg">{sensor.name}</h3>
         <span className={`px-2 py-1 rounded text-xs font-bold ${getStatusBadge(sensor.status)}`}>
@@ -33,7 +53,9 @@ export function SensorCard({ sensor }) {
       </div>
       <p className="text-sm mb-1">Location: {sensor.location}</p>
       <p className="text-sm mb-1">Temperature: {sensor.temperature}°C</p>
-      <p className="text-sm mb-3">Smoke Level: {sensor.smokeLevel}%</p>
+      <p className="text-sm mb-1">Smoke Level: {sensor.smokeLevel} ppm</p>
+      <p className="text-sm mb-1">Gas Level: {sensor.gasLevel} ppm</p>
+      <p className="text-sm mb-3">Humidity: {sensor.humidity}%</p>
 
       {/* Sparkline chart */}
       {sensor.history && sensor.history.length > 0 && (
