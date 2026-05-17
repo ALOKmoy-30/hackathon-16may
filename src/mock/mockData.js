@@ -3,11 +3,12 @@
 
 export let mockSensorData = {
   sensors: [
+    // --- Room 1 ---
     {
       id: 1,
-      name: 'Smoke Sensor 1 (Lab)',
-      zone: 'Lab',
-      location: 'Floor 1 - Lab',
+      name: 'Smoke Sensor 1 (Room 1)',
+      zone: 'Room 1',
+      location: 'Room 1',
       temperature: 0,
       smokeLevel: 0,
       gasLevel: 0,
@@ -18,61 +19,9 @@ export let mockSensorData = {
     },
     {
       id: 2,
-      name: 'Smoke Sensor 2 (Hallway)',
-      zone: 'Hallway',
-      location: 'Floor 1 - Hallway',
-      temperature: 0,
-      smokeLevel: 0,
-      gasLevel: 0,
-      humidity: 50,
-      status: 'NORMAL',
-      lastUpdate: '2026-05-15T17:06:00.000Z',
-      history: [{ time: '17:01', value: 0 }],
-    },
-    {
-      id: 3,
-      name: 'Smoke Sensor 3 (Office)',
-      zone: 'Office',
-      location: 'Floor 1 - Office',
-      temperature: 0,
-      smokeLevel: 0,
-      gasLevel: 0,
-      humidity: 50,
-      status: 'NORMAL',
-      lastUpdate: '2026-05-15T17:06:00.000Z',
-      history: [{ time: '17:01', value: 0 }],
-    },
-    {
-      id: 4,
-      name: 'Smoke Sensor 4 (Hallway)',
-      zone: 'Hallway',
-      location: 'Floor 1 - Hallway Section 2',
-      temperature: 0,
-      smokeLevel: 0,
-      gasLevel: 0,
-      humidity: 50,
-      status: 'NORMAL',
-      lastUpdate: '2026-05-15T17:06:00.000Z',
-      history: [{ time: '17:01', value: 0 }],
-    },
-    {
-      id: 5,
-      name: 'Smoke Sensor 5 (Office)',
-      zone: 'Office',
-      location: 'Floor 1 - Office Section 2',
-      temperature: 0,
-      smokeLevel: 0,
-      gasLevel: 0,
-      humidity: 50,
-      status: 'NORMAL',
-      lastUpdate: '2026-05-15T17:06:00.000Z',
-      history: [{ time: '17:01', value: 0 }],
-    },
-    {
-      id: 6,
-      name: 'Smoke Sensor 6 (Lab)',
-      zone: 'Lab',
-      location: 'Floor 1 - Lab Section 2',
+      name: 'Smoke Sensor 2 (Room 1)',
+      zone: 'Room 1',
+      location: 'Room 1',
       temperature: 0,
       smokeLevel: 0,
       gasLevel: 0,
@@ -83,9 +32,9 @@ export let mockSensorData = {
     },
     {
       id: 7,
-      name: 'Temp Sensor 1 (Lab)',
-      zone: 'Lab',
-      location: 'Floor 1 - Lab',
+      name: 'Temp Sensor 1 (Room 1)',
+      zone: 'Room 1',
+      location: 'Room 1',
       temperature: 25,
       smokeLevel: 0,
       gasLevel: 0,
@@ -96,9 +45,9 @@ export let mockSensorData = {
     },
     {
       id: 8,
-      name: 'Temp Sensor 2 (Hallway)',
-      zone: 'Hallway',
-      location: 'Floor 1 - Hallway',
+      name: 'Temp Sensor 2 (Room 1)',
+      zone: 'Room 1',
+      location: 'Room 1',
       temperature: 25,
       smokeLevel: 0,
       gasLevel: 0,
@@ -107,11 +56,39 @@ export let mockSensorData = {
       lastUpdate: '2026-05-15T17:06:00.000Z',
       history: [{ time: '17:01', value: 25 }],
     },
+
+    // --- Room 2 ---
+    {
+      id: 3,
+      name: 'Smoke Sensor 1 (Room 2)',
+      zone: 'Room 2',
+      location: 'Room 2',
+      temperature: 0,
+      smokeLevel: 0,
+      gasLevel: 0,
+      humidity: 50,
+      status: 'NORMAL',
+      lastUpdate: '2026-05-15T17:06:00.000Z',
+      history: [{ time: '17:01', value: 0 }],
+    },
+    {
+      id: 4,
+      name: 'Smoke Sensor 2 (Room 2)',
+      zone: 'Room 2',
+      location: 'Room 2',
+      temperature: 0,
+      smokeLevel: 0,
+      gasLevel: 0,
+      humidity: 50,
+      status: 'NORMAL',
+      lastUpdate: '2026-05-15T17:06:00.000Z',
+      history: [{ time: '17:01', value: 0 }],
+    },
     {
       id: 9,
-      name: 'Temp Sensor 3 (Office)',
-      zone: 'Office',
-      location: 'Floor 1 - Office',
+      name: 'Temp Sensor 1 (Room 2)',
+      zone: 'Room 2',
+      location: 'Room 2',
       temperature: 25,
       smokeLevel: 0,
       gasLevel: 0,
@@ -122,9 +99,9 @@ export let mockSensorData = {
     },
     {
       id: 10,
-      name: 'Temp Sensor 4 (Hallway)',
-      zone: 'Hallway',
-      location: 'Floor 1 - Hallway Section 2',
+      name: 'Temp Sensor 2 (Room 2)',
+      zone: 'Room 2',
+      location: 'Room 2',
       temperature: 25,
       smokeLevel: 0,
       gasLevel: 0,
@@ -133,11 +110,39 @@ export let mockSensorData = {
       lastUpdate: '2026-05-15T17:06:00.000Z',
       history: [{ time: '17:01', value: 25 }],
     },
+
+    // --- Main Hall ---
+    {
+      id: 5,
+      name: 'Smoke Sensor 1 (Main Hall)',
+      zone: 'Main Hall',
+      location: 'Main Hall',
+      temperature: 0,
+      smokeLevel: 0,
+      gasLevel: 0,
+      humidity: 50,
+      status: 'NORMAL',
+      lastUpdate: '2026-05-15T17:06:00.000Z',
+      history: [{ time: '17:01', value: 0 }],
+    },
+    {
+      id: 6,
+      name: 'Smoke Sensor 2 (Main Hall)',
+      zone: 'Main Hall',
+      location: 'Main Hall',
+      temperature: 0,
+      smokeLevel: 0,
+      gasLevel: 0,
+      humidity: 50,
+      status: 'NORMAL',
+      lastUpdate: '2026-05-15T17:06:00.000Z',
+      history: [{ time: '17:01', value: 0 }],
+    },
     {
       id: 11,
-      name: 'Temp Sensor 5 (Office)',
-      zone: 'Office',
-      location: 'Floor 1 - Office Section 2',
+      name: 'Temp Sensor 1 (Main Hall)',
+      zone: 'Main Hall',
+      location: 'Main Hall',
       temperature: 25,
       smokeLevel: 0,
       gasLevel: 0,
@@ -148,9 +153,9 @@ export let mockSensorData = {
     },
     {
       id: 12,
-      name: 'Temp Sensor 6 (Lab)',
-      zone: 'Lab',
-      location: 'Floor 1 - Lab Section 2',
+      name: 'Temp Sensor 2 (Main Hall)',
+      zone: 'Main Hall',
+      location: 'Main Hall',
       temperature: 25,
       smokeLevel: 0,
       gasLevel: 0,
@@ -194,7 +199,7 @@ export const startStressTestSimulation = (onUpdate) => {
       let newTemp = sensor.temperature;
       let newStatus = sensor.status;
 
-      if (sensor.id === 1) { // Lab sensor
+      if (sensor.zone === 'Room 1') { // Room 1
         if (simulationStep <= 10) {
           newGas = Math.min(100, simulationStep * 10); // Increase rapidly
           newSmoke = Math.min(100, simulationStep * 5);
@@ -204,9 +209,9 @@ export const startStressTestSimulation = (onUpdate) => {
           newSmoke = 50;
           newTemp = 60;
         }
-      } else if (sensor.id === 2 || sensor.id === 4) { // Hallway sensors
+      } else if (sensor.zone === 'Main Hall') { // Main Hall
         if (simulationStep > 10 && simulationStep <= 20) {
-          newGas = Math.min(100, (simulationStep - 10) * 10); // Start increasing after Lab
+          newGas = Math.min(100, (simulationStep - 10) * 10); // Start increasing after Room 1
           newSmoke = Math.min(100, (simulationStep - 10) * 5);
           newTemp = Math.min(50, 25 + (simulationStep - 10) * 1.5);
         } else if (simulationStep > 20) {
