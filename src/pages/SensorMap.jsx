@@ -5,11 +5,16 @@ export function SensorMap() {
   const { sensors, loading } = useSensors();
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
-      <h1 className="text-4xl font-bold mb-6">Sensor Map</h1>
+    <div className="space-y-5">
+      <div>
+        <h1 className="text-2xl font-bold text-[#f0f0f0]">Sensor Map</h1>
+        <p className="text-sm text-[#555555] mt-1">Interactive floor plan with live sensor data</p>
+      </div>
 
       {loading ? (
-        <p>Loading sensors...</p>
+        <div className="bg-[#141414] border border-[#222222] rounded-xl p-12 flex items-center justify-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-2 border-[#00ff88] border-t-transparent" />
+        </div>
       ) : (
         <FloorPlan sensors={sensors} />
       )}

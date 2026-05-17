@@ -1,10 +1,10 @@
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, MapPin, Navigation, Settings, Bell, X } from 'lucide-react';
+import { LayoutDashboard, List, Navigation, Settings, Bell, Power } from 'lucide-react';
 
 const navItems = [
   { path: '/', label: 'Dashboard', icon: LayoutDashboard },
-  { path: '/sensors', label: 'Sensor Map', icon: MapPin },
-  { path: '/evacuation', label: 'Evacuation Paths', icon: Navigation },
+  { path: '/sensors', label: 'Sensors', icon: List },
+  { path: '/evacuation', label: 'Evacuation', icon: Navigation },
   { path: '/control', label: 'Control Panel', icon: Settings },
   { path: '/alerts', label: 'Alerts', icon: Bell },
 ];
@@ -14,35 +14,60 @@ export function Sidebar({ isOpen, onClose }) {
 
   return (
     <>
+      {/* Mobile overlay */}
       {isOpen && (
-        <div className="fixed inset-0 bg-black/80 lg:hidden z-40" onClick={onClose}></div>
+        <div
+          className="fixed inset-0 bg-black/60 md:hidden z-40"
+          onClick={onClose}
+        />
       )}
 
-      <aside className={`fixed inset-y-0 left-0 w-72 bg-neutral-900 border-r border-neutral-800 text-white z-50 transform transition-transform duration-500 ease-in-out lg:static lg:transform-none ${isOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'}`}>
-        <div className="lg:hidden flex justify-end p-6">
-          <button onClick={onClose} className="p-3 touch-target bg-neutral-800 hover:bg-neutral-700 rounded-2xl transition">
-            <X size={26} />
+      {/* Sidebar */}
+      <aside
+        className={`fixed md:static top-0 left-0 h-screen w-[60px] bg-[#111111] border-r border-[#222222] z-40 flex flex-col transition-transform duration-200 ease-in-out ${
+          isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
+        }`}
+      >
+        {/* Nav icons */}
+        <nav className="flex-1 flex flex-col items-center pt-4 gap-1">
+          {navItems.map(({ path, label, icon: Icon }) => {
+            const isActive = location.pathname === path;
+            return (
+              <Link
+                key={path}
+                to={path}
+                onClick={onClose}
+                className={`group relative flex items-center justify-center w-10 h-10 rounded-lg transition-all duration-200 ${
+                  isActive
+                    ? 'bg-[rgba(0,255,136,0.05)] text-[#00ff88]'
+                    : 'text-[#555555] hover:text-white hover:bg-[rgba(255,255,255,0.05)]'
+                }`}
+              >
+                {/* Active accent bar */}
+                {isActive && (
+                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-[#00ff88] rounded-r-full" />
+                )}
+                <Icon size={20} />
+                {/* Tooltip */}
+                <span className="absolute left-16 bg-[#1a1a1a] text-[#f0f0f0] text-xs px-2 py-1 rounded-md whitespace-nowrap pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50">
+                  {label}
+                </span>
+              </Link>
+            );
+          })}
+        </nav>
+
+        {/* Logout at bottom */}
+        <div className="flex flex-col items-center pb-4 mt-auto">
+          <button
+            className="group relative flex items-center justify-center w-10 h-10 rounded-lg text-[#555555] hover:text-white hover:bg-[rgba(255,255,255,0.05)] transition-all duration-200"
+          >
+            <Power size={20} />
+            <span className="absolute left-16 bg-[#1a1a1a] text-[#f0f0f0] text-xs px-2 py-1 rounded-md whitespace-nowrap pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50">
+              Logout
+            </span>
           </button>
         </div>
-
-        <nav className="p-6 space-y-4 mt-4">
-          <p className="px-4 text-[10px] font-black uppercase tracking-[0.2em] text-neutral-500 mb-6">Main Command</p>
-          {navItems.map(({ path, label, icon: Icon }) => (
-            <Link
-              key={path}
-              to={path}
-              onClick={onClose}
-              className={`flex items-center gap-4 px-6 py-4 rounded-3xl transition-all duration-300 touch-target ${
-                location.pathname === path
-                  ? 'bg-emerald-500 text-black font-black shadow-[0_10px_20px_-5px_rgba(16,185,129,0.3)]'
-                  : 'text-neutral-400 hover:bg-neutral-800 hover:text-white'
-              }`}
-            >
-              <Icon size={22} />
-              <span className="text-sm tracking-tight">{label}</span>
-            </Link>
-          ))}
-        </nav>
       </aside>
     </>
   );

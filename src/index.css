@@ -1,38 +1,27 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-@layer base {
-  html {
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    background-color: #000000;
-    color: #ffffff;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
+body {
+  background: #090909;
+  color: #f0f0f0;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  margin: 0;
 }
 
-@layer components {
-  .touch-target {
-    min-width: 44px;
-    min-height: 44px;
-  }
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: #090909; }
+::-webkit-scrollbar-thumb { background: #333333; border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: #555555; }
 
-  .danger-pulse {
-    animation: pulse-danger 2s infinite;
-  }
+/* Evacuation path dash animation */
+@keyframes dash {
+  to { stroke-dashoffset: -48; }
+}
 
-  @keyframes pulse-danger {
-    0% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.8; transform: scale(1.01); }
-    100% { opacity: 1; transform: scale(1); }
-  }
-
-  .glow-emerald {
-    filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.6));
-  }
-
-  .glow-crimson {
-    filter: drop-shadow(0 0 8px rgba(239, 68, 68, 0.6));
-  }
+/* Danger pulse for badges */
+@keyframes pulse-danger {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
 }

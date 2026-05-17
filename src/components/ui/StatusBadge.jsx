@@ -1,21 +1,24 @@
-import React from 'react';
-
 export function StatusBadge({ status = 'OFFLINE' }) {
-  const statusStyles = {
-    NORMAL: 'bg-[var(--status-normal-bg)] border border-[var(--status-normal-border)] text-[var(--status-normal-text)]',
-    WARNING: 'bg-[var(--status-warning-bg)] border border-[var(--status-warning-border)] text-[var(--status-warning-text)]',
-    DANGER: 'bg-[var(--status-danger-bg)] border border-[var(--status-danger-border)] text-[var(--status-danger-text)]',
-    OFFLINE: 'bg-[var(--status-offline-bg)] border border-[var(--status-offline-border)] text-[var(--status-offline-text)]',
+  const styles = {
+    NORMAL: 'bg-[#00ff88]/10 text-[#00ff88] border border-[#00ff88]/20',
+    WARNING: 'bg-[#ffaa00]/10 text-[#ffaa00] border border-[#ffaa00]/20',
+    DANGER: 'bg-[#ff4444]/10 text-[#ff4444] border border-[#ff4444]/20',
+    OFFLINE: 'bg-[#555555]/10 text-[#555555] border border-[#555555]/20',
+    // lowercase variants for compatibility
+    normal: 'bg-[#00ff88]/10 text-[#00ff88] border border-[#00ff88]/20',
+    warning: 'bg-[#ffaa00]/10 text-[#ffaa00] border border-[#ffaa00]/20',
+    critical: 'bg-[#ff4444]/10 text-[#ff4444] border border-[#ff4444]/20',
+    danger: 'bg-[#ff4444]/10 text-[#ff4444] border border-[#ff4444]/20',
+    offline: 'bg-[#555555]/10 text-[#555555] border border-[#555555]/20',
   };
 
-  const badgeClass = statusStyles[status] || statusStyles.OFFLINE;
+  const badgeClass = styles[status] || styles.OFFLINE;
+  const isDanger = status === 'DANGER' || status === 'danger' || status === 'critical';
 
   return (
-    <span className={
-      `inline-flex items-center gap-2 px-[var(--space-3)] py-[var(--space-1)] rounded-[var(--radius-full)] text-[var(--text-xs)] font-[var(--weight-medium)] tracking-wide uppercase ${badgeClass}`
-    }>
-      {status === 'DANGER' && (
-        <span className="w-2 h-2 rounded-full bg-[var(--status-danger-text)] shadow-[0_0_8px_rgba(255,68,68,0.6)] animate-pulse"></span>
+    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium uppercase tracking-wide ${badgeClass}`}>
+      {isDanger && (
+        <span className="w-1.5 h-1.5 rounded-full bg-[#ff4444] mr-1.5 inline-block animate-pulse" />
       )}
       {status}
     </span>

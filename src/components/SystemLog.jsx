@@ -1,43 +1,51 @@
 import { useContext, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { AppContext } from '../context/AppContext.jsx';
-import { Terminal, ChevronUp, ChevronDown, Trash2 } from 'lucide-react';
+import { Terminal, ChevronUp, ChevronDown } from 'lucide-react';
 
 export function SystemLog() {
   const { systemLog } = useContext(AppContext);
   const [isOpen, setIsOpen] = useState(false);
+  const location = useLocation();
+
+  const hiddenRoutes = ['/evacuation', '/sensors'];
+  if (hiddenRoutes.includes(location.pathname)) return null;
 
   if (systemLog.length === 0 && !isOpen) return null;
 
+  const getLogColor = (type) => {
+    switch (type) {
+      case 'error': return 'text-[#ff4444]';
+      case 'warning': return 'text-[#ffaa00]';
+      default: return 'text-[#00ff88]';
+    }
+  };
+
   return (
-    <div className={`fixed bottom-0 left-0 right-0 bg-neutral-900 border-t border-neutral-800 transition-all duration-500 z-[60] shadow-[0_-20px_50px_rgba(0,0,0,0.5)] ${isOpen ? 'h-80' : 'h-12'}`}>
-      <div className="flex items-center justify-between px-8 h-12 cursor-pointer hover:bg-neutral-800 transition-colors" onClick={() => setIsOpen(!isOpen)}>
-        <div className="flex items-center gap-3">
-          <Terminal size={18} className="text-emerald-500 glow-emerald" />
-          <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white">System Logs <span className="text-neutral-500 ml-2">[{systemLog.length}]</span></span>
+    <div className={`fixed bottom-0 left-0 right-0 bg-[#050505] border-t border-[#1e1e1e] transition-all duration-300 z-[60] ${isOpen ? 'h-72' : 'h-10'}`}>
+      <div
+        className="flex items-center justify-between px-4 h-10 cursor-pointer hover:bg-[#0a0a0a] transition-colors duration-200"
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        <div className="flex items-center gap-2">
+          <Terminal size={14} className="text-[#00ff88]" />
+          <span className="text-xs font-medium text-[#f0f0f0]">
+            System Logs <span className="text-[#555555] ml-1">[{systemLog.length}]</span>
+          </span>
         </div>
-        <div className="flex items-center gap-6">
-          {isOpen ? <ChevronDown size={20} className="text-neutral-500" /> : <ChevronUp size={20} className="text-neutral-500" />}
-        </div>
+        {isOpen ? <ChevronDown size={16} className="text-[#555555]" /> : <ChevronUp size={16} className="text-[#555555]" />}
       </div>
 
       {isOpen && (
-        <div className="p-8 h-68 overflow-y-auto font-mono text-[10px] space-y-4 bg-black">
+        <div className="p-4 font-mono text-xs max-h-[calc(100%-2.5rem)] overflow-y-auto space-y-2">
           {systemLog.map((entry) => (
-            <div key={entry.id} className="border-b border-neutral-900 pb-4 last:border-0">
-              <div className="flex items-center gap-4 mb-2">
-                <span className="text-neutral-600 font-bold">{new Date(entry.timestamp).toLocaleTimeString()}</span>
-                <span className={`px-2 py-0.5 rounded font-black uppercase tracking-tighter ${
-                  entry.type === 'error' ? 'bg-red-500 text-white' :
-                  entry.type === 'warning' ? 'bg-orange-500 text-white' :
-                  'bg-emerald-500 text-black'
-                }`}>{entry.type}</span>
-                <span className="text-neutral-300 font-bold">{entry.message}</span>
-              </div>
-              {entry.data && (
-                <pre className="bg-neutral-900 p-4 rounded-2xl text-neutral-400 overflow-x-auto border border-neutral-800">
-                  {JSON.stringify(entry.data, null, 2)}
-                </pre>
-              )}
+            <div key={entry.id} className="flex items-start gap-2">
+              <span className="text-[#555555] shrink-0">
+                {new Date(entry.timestamp).toLocaleTimeString()}
+              </span>
+              <span className={getLogColor(entry.type)}>
+                {entry.message}
+              </span>
             </div>
           ))}
         </div>

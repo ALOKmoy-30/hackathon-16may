@@ -1,66 +1,53 @@
-import { LineChart, Line, ResponsiveContainer } from 'recharts';
-import { AlertCircle } from 'lucide-react';
+import { Thermometer, Flame, Wind, Info } from 'lucide-react';
+import { StatusBadge } from './ui/StatusBadge.jsx';
 
 export function SensorCard({ sensor }) {
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'DANGER': return 'text-red-500 danger-pulse';
-      case 'WARNING': return 'text-orange-500';
-      case 'NORMAL': return 'text-emerald-500';
-      default: return 'text-neutral-400';
-    }
+  const getIcon = () => {
+    const type = (sensor.type || sensor.name || '').toLowerCase();
+    if (type.includes('temp') || type.includes('thermal')) return Thermometer;
+    if (type.includes('flame') || type.includes('fire')) return Flame;
+    return Wind;
   };
 
-  const getBadgeBg = (status) => {
-    switch (status) {
-      case 'DANGER': return 'bg-red-500 text-white shadow-[0_0_15px_rgba(239,68,68,0.4)]';
-      case 'WARNING': return 'bg-orange-500 text-white';
-      case 'NORMAL': return 'bg-emerald-500 text-black';
-      default: return 'bg-neutral-800 text-neutral-400';
-    }
+  const Icon = getIcon();
+
+  const getValue = () => {
+    if (sensor.value !== undefined) return sensor.value;
+    if (sensor.temperature !== undefined) return `${sensor.temperature}°C`;
+    return '--';
+  };
+
+  const getUnit = () => {
+    const type = (sensor.type || sensor.name || '').toLowerCase();
+    if (type.includes('temp') || type.includes('thermal')) return '°C';
+    if (type.includes('smoke')) return '%';
+    if (type.includes('flame')) return '';
+    return '';
   };
 
   return (
-    <div className="bg-neutral-900 rounded-3xl p-6 transition-all duration-300 hover:bg-neutral-800 group">
-      <div className="flex justify-between items-start mb-6">
-        <div>
-          <h3 className="font-black text-xl text-white tracking-tight group-hover:text-emerald-500 transition-colors">{sensor.name}</h3>
-          <p className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest mt-1">{sensor.location}</p>
-        </div>
-        <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter ${getBadgeBg(sensor.status)}`}>
-          {sensor.status}
-        </span>
+    <div className="bg-[#141414] border border-[#222222] rounded-xl p-5 transition-all duration-200 hover:bg-[#181818] hover:border-[#2a2a2a] group">
+      {/* Top row: icon + info */}
+      <div className="flex items-center justify-between mb-3">
+        <Icon size={20} className="text-[#00ff88]" />
+        <button className="text-[#555555] hover:text-[#888888] transition-colors duration-200">
+          <Info size={16} />
+        </button>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 mb-8">
-        {[
-          { label: 'Thermal', value: `${sensor.temperature}°C` },
-          { label: 'Humidity', value: `${sensor.humidity}%` },
-          { label: 'Smoke', value: sensor.smokeLevel },
-          { label: 'Toxic Gas', value: sensor.gasLevel },
-        ].map((item, i) => (
-          <div key={i} className="bg-black/20 rounded-2xl p-4">
-            <p className="text-[9px] font-black text-neutral-500 uppercase tracking-widest mb-1">{item.label}</p>
-            <p className={`text-xl font-black tracking-tight ${getStatusColor(sensor.status)}`}>{item.value}</p>
-          </div>
-        ))}
-      </div>
+      {/* Sensor name */}
+      <h3 className="text-sm font-semibold text-[#f0f0f0] mb-1">{sensor.name}</h3>
 
-      {sensor.history && (
-        <div className="h-12 opacity-40 group-hover:opacity-100 transition-opacity">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={sensor.history}>
-              <Line
-                type="monotone"
-                dataKey="value"
-                stroke={sensor.status === 'DANGER' ? '#EF4444' : '#10B981'}
-                strokeWidth={3}
-                dot={false}
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-      )}
+      {/* Location */}
+      <p className="text-xs text-[#555555] mb-3">{sensor.location || sensor.zone || ''}</p>
+
+      {/* Value + Badge */}
+      <div className="flex items-end justify-between">
+        <p className="text-sm text-[#888888]">
+          {getValue()}{getUnit()}
+        </p>
+        <StatusBadge status={sensor.status || 'NORMAL'} />
+      </div>
     </div>
   );
 }

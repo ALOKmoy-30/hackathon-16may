@@ -13,7 +13,9 @@ export function AppProvider({ children }) {
 
   const addLogEntry = useCallback((entry) => {
     setSystemLog(prev => {
-      const newLog = [{ id: Date.now(), timestamp: new Date().toISOString(), ...entry }, ...prev];
+      // Use random string appended to timestamp to guarantee unique keys
+      const uniqueId = Date.now().toString() + '-' + Math.random().toString(36).substr(2, 9);
+      const newLog = [{ id: uniqueId, timestamp: new Date().toISOString(), ...entry }, ...prev];
       return newLog.slice(0, 50);
     });
   }, []);
@@ -38,7 +40,7 @@ export function AppProvider({ children }) {
         const data = await getSensorData();
         setSensors(data.sensors);
         setAlerts(data.alerts);
-        addLogEntry({ type: 'info', message: 'Initial sensor data loaded.', data: data });
+        addLogEntry({ type: 'info', message: `Initial sensor data loaded (${data.sensors.length} active sensors).` });
       } catch (error) {
         console.error('Failed to load sensor data:', error);
       } finally {
