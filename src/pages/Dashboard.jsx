@@ -23,9 +23,9 @@ export function Dashboard() {
     { time: '20:00', temperature: 23 },
   ];
 
-  const totalSensors = sensors.length;
-  const activeAlerts = alerts.length;
-  const zones = new Set(sensors.map(s => s.zone)).size;
+  const totalSensors = sensors?.length || 0;
+  const activeAlerts = alerts?.length || 0;
+  const zones = new Set((sensors || []).map(s => s.zone)).size;
 
   const handleQuickAlert = async () => {
     setSendingAlert(true);
@@ -79,7 +79,7 @@ export function Dashboard() {
 
       {/* Sensor Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-        {sensors.map(sensor => (
+        {(sensors || []).map(sensor => (
           <SensorCard key={sensor.id} sensor={sensor} />
         ))}
       </div>

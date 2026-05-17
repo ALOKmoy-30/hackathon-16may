@@ -12,12 +12,12 @@ const floor1Rooms = [
 
 // Floor plan data for Floor 2
 const floor2Rooms = [
-  { id: 'G', name: 'Zone G', x: 20, y: 20, width: 80, height: 60, sensorId: 1 },
-  { id: 'H', name: 'Zone H', x: 120, y: 20, width: 80, height: 60, sensorId: 2 },
-  { id: 'I', name: 'Zone I', x: 220, y: 20, width: 80, height: 60, sensorId: 3 },
-  { id: 'J', name: 'Zone J', x: 20, y: 100, width: 80, height: 60, sensorId: 4 },
-  { id: 'K', name: 'Zone K', x: 120, y: 100, width: 80, height: 60, sensorId: 5 },
-  { id: 'L', name: 'Zone L', x: 220, y: 100, width: 80, height: 60, sensorId: 6 },
+  { id: 'G', name: 'Zone G', x: 20, y: 20, width: 80, height: 60, sensorId: 7 },
+  { id: 'H', name: 'Zone H', x: 120, y: 20, width: 80, height: 60, sensorId: 8 },
+  { id: 'I', name: 'Zone I', x: 220, y: 20, width: 80, height: 60, sensorId: 9 },
+  { id: 'J', name: 'Zone J', x: 20, y: 100, width: 80, height: 60, sensorId: 10 },
+  { id: 'K', name: 'Zone K', x: 120, y: 100, width: 80, height: 60, sensorId: 11 },
+  { id: 'L', name: 'Zone L', x: 220, y: 100, width: 80, height: 60, sensorId: 12 },
 ];
 
 // Exit locations
