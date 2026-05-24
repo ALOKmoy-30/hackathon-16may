@@ -61,16 +61,28 @@ export function Dashboard() {
   const { alerts, removeAlert, addAlert } = useAlerts();
   const { addLogEntry } = useContext(AppContext);
   const [sendingAlert, setSendingAlert] = useState(false);
-  const [chartPeriod, setChartPeriod] = useState('Day');
+  const [chartPeriod, setChartPeriod] = useState('Month');
 
-  const mockChartData = [
+  const allMockChartData = [
     { time: '00:00', temperature: 20 },
     { time: '04:00', temperature: 22 },
     { time: '08:00', temperature: 25 },
     { time: '12:00', temperature: 28 },
     { time: '16:00', temperature: 26 },
     { time: '20:00', temperature: 23 },
+    { time: 'Jan', temperature: 12 },
+    { time: 'Feb', temperature: 18 },
+    { time: 'Mar', temperature: 24 },
+    { time: 'Apr', temperature: 31 },
+    { time: 'May', temperature: 28 },
+    { time: 'Jun', temperature: 35 },
   ];
+
+  const getFilteredData = () => {
+    if (chartPeriod === 'Day') return allMockChartData.slice(0, 6);
+    if (chartPeriod === 'Week') return allMockChartData.slice(6, 10);
+    return allMockChartData;
+  };
 
   const totalSensors = sensors?.length || 0;
   const activeAlerts = alerts?.length || 0;
@@ -181,10 +193,10 @@ export function Dashboard() {
               ))}
             </div>
           </div>
-          <ChartWidget data={mockChartData} title="" dataKey="temperature" color="#00ff88" />
+          <ChartWidget data={getFilteredData()} title="" dataKey="temperature" color="#00ff88" />
         </div>
         <div className="bg-[#141414] border border-[#222222] rounded-xl p-5">
-          <ChartWidget data={mockChartData} title="Air Quality" dataKey="temperature" color="#00ff88" />
+          <ChartWidget data={getFilteredData()} title="Air Quality" dataKey="temperature" color="#00ff88" />
         </div>
       </div>
     </div>

@@ -15,16 +15,20 @@ function AppContent() {
   useSocket();
 
   return (
-    <Layout>
-      <Routes>
-        <Route path="/" element={<Dashboard />} />
-        <Route path="/sensors" element={<SensorMap />} />
-        <Route path="/evacuation" element={<EvacuationPaths />} />
-        <Route path="/control" element={<ControlPanel />} />
-        <Route path="/alerts" element={<Alerts />} />
-      </Routes>
-      <SystemLog />
-    </Layout>
+    <Routes>
+      <Route path="/*" element={
+        <Layout>
+          <Routes>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/sensors" element={<SensorMap />} />
+            <Route path="/evacuation" element={<EvacuationPaths />} />
+            <Route path="/control" element={<ControlPanel />} />
+            <Route path="/alerts" element={<Alerts />} />
+          </Routes>
+          <SystemLog />
+        </Layout>
+      } />
+    </Routes>
   );
 }
 

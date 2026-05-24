@@ -1,7 +1,6 @@
-import { useState, useEffect, useContext } from 'react';
-import { AppContext } from '../context/AppContext.jsx';
+import { useEvacuation } from '../hooks/useEvacuation.js';
 
-const zones = {
+const zonesData = {
   room1: { id: 'room1', name: 'Room 1', x: 50, y: 50, width: 350, height: 180 },
   room2: { id: 'room2', name: 'Room 2', x: 50, y: 270, width: 350, height: 180 },
   mainHall: { id: 'mainHall', name: 'Main Hall', x: 450, y: 50, width: 300, height: 400 },
@@ -16,52 +15,36 @@ const exits = [
 const floors = ['Floor 1', 'Floor 2', 'Floor 3'];
 
 export function EvacuationPathsMap() {
-  const { sensors, setSensors } = useContext(AppContext);
-  const [dangerLevels, setDangerLevels] = useState({ room1: 0, room2: 0, mainHall: 0 });
-  const [activeFloor, setActiveFloor] = useState(0);
-
-  useEffect(() => {
-    const levels = { room1: 0, room2: 0, mainHall: 0 };
-    const zoneMapping = { 
-      1: 'room1', 2: 'room1', 7: 'room1', 8: 'room1',
-      3: 'room2', 4: 'room2', 9: 'room2', 10: 'room2',
-      5: 'mainHall', 6: 'mainHall', 11: 'mainHall', 12: 'mainHall'
-    };
-
-    sensors.forEach(sensor => {
-      const zone = zoneMapping[sensor.id];
-      if (zone) {
-        const sensorDanger = Math.max(sensor.smokeLevel || 0, sensor.gasLevel || 0);
-        levels[zone] = Math.max(levels[zone], sensorDanger);
-      }
-    });
-
-    setDangerLevels(levels);
-  }, [sensors]);
-
-  const toggleTestHazard = (zoneId) => {
-    setSensors(prev => prev.map(s => {
-      const mappedZone = { 
-        1: 'room1', 2: 'room1', 7: 'room1', 8: 'room1',
-        3: 'room2', 4: 'room2', 9: 'room2', 10: 'room2',
-        5: 'mainHall', 6: 'mainHall', 11: 'mainHall', 12: 'mainHall'
-      }[s.id];
-      
-      if (mappedZone === zoneId && s.name.includes('Smoke')) {
-        const danger = Math.max(s.smokeLevel || 0, s.gasLevel || 0) > 0 ? 0 : 85;
-        return { ...s, smokeLevel: danger, gasLevel: danger, status: danger > 0 ? 'DANGER' : 'NORMAL' };
-      }
-      return s;
-    }));
-  };
+  const {
+    selectedZone, setSelectedZone,
+    currentFloor, setCurrentFloor,
+    route,
+    manualRiskMap,
+    isSimulating,
+    simulationStep,
+    ignitionNode,
+    hasSimulated,
+    blockNode,
+    unblockNode,
+    startSimulation,
+    pauseSimulation,
+    resumeSimulation,
+    resetToNormal,
+    simulationSpeed,
+    setSimulationSpeed
+  } = useEvacuation();
 
   const getEvacuationPath = (zoneId) => {
-    const zone = zones[zoneId];
-    const isDanger = dangerLevels[zoneId] > 70;
-    
+    const zone = zonesData[zoneId];
+    if (!zone) return "";
+
     const startX = zone.x + zone.width / 2;
     const startY = zone.y + zone.height / 2;
 
+    const routeForZone = selectedZone ? (selectedZone === zoneId ? route : []) : route;
+    // If we only show route for selected zone or all zones
+    const isDanger = (manualRiskMap[zoneId] || 0) > 70;
+    
     let exit;
     if (zoneId === 'room1') {
       exit = isDanger ? exits[0] : exits[2];
@@ -82,16 +65,16 @@ export function EvacuationPathsMap() {
 
   return (
     <div className="space-y-5">
-      {/* Floor tabs + Simulation Controls */}
+      {/* Floor tabs + Speed Controls */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         {/* Floor tabs */}
         <div className="bg-[#0f0f0f] rounded-lg p-1 inline-flex gap-1">
           {floors.map((floor, idx) => (
             <button
               key={floor}
-              onClick={() => setActiveFloor(idx)}
+              onClick={() => setCurrentFloor(idx + 1)}
               className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors duration-200 ${
-                activeFloor === idx
+                currentFloor === idx + 1
                   ? 'bg-[#141414] text-[#00ff88]'
                   : 'text-[#888888] hover:text-[#f0f0f0]'
               }`}
@@ -101,63 +84,77 @@ export function EvacuationPathsMap() {
           ))}
         </div>
 
-        {/* Simulation buttons */}
-        <div className="flex flex-wrap gap-2">
-          {Object.entries(zones).map(([id, zone]) => (
-            <button
-              key={id}
-              onClick={() => toggleTestHazard(id)}
-              className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors duration-200 active:scale-95 ${
-                dangerLevels[id] > 70
-                  ? 'border border-[#ff4444]/30 text-[#ff4444] hover:bg-[#ff4444]/10'
-                  : 'border border-[#222222] text-[#888888] hover:text-[#f0f0f0] hover:border-[#333333]'
-              }`}
-            >
-              {zone.name} {dangerLevels[id] > 70 ? '⚠ Active' : ''}
-            </button>
-          ))}
-        </div>
+        {/* Speed Controls */}
+        {isSimulating && (
+          <div className="flex bg-[#0f0f0f] rounded-lg p-1">
+            <span className="px-3 py-1.5 text-sm text-[#555555] font-medium">Speed:</span>
+            {[1500, 750, 300].map((speed, i) => {
+              const labels = ['1x', '2x', '5x'];
+              return (
+                <button
+                  key={speed}
+                  onClick={() => setSimulationSpeed(speed)}
+                  className={`px-3 py-1.5 text-xs font-bold rounded-md transition-colors duration-200 ${
+                    simulationSpeed === speed
+                      ? 'bg-[#141414] text-[#00ff88]'
+                      : 'text-[#888888] hover:text-[#f0f0f0]'
+                  }`}
+                >
+                  {labels[i]}
+                </button>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* Map + Info panel */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {/* SVG Map */}
-        <div className="lg:col-span-2 bg-[#141414] border border-[#222222] rounded-xl p-5">
-          <div className="w-full" style={{ aspectRatio: '8/5' }}>
-            <svg viewBox="0 0 800 500" className="w-full h-full" preserveAspectRatio="xMidYMid meet">
-              {/* Corridor background */}
+        <div className="lg:col-span-2 bg-[#141414] border border-[#222222] rounded-xl p-5 overflow-hidden">
+          {/* Changed minHeight or removed fixed height to ensure fit */}
+          <div className="w-full relative" style={{ paddingBottom: '62.5%' }}>
+            <svg 
+              viewBox="0 0 800 500" 
+              className="absolute top-0 left-0 w-full h-full" 
+              preserveAspectRatio="xMidYMid meet"
+            >
               <rect x="400" y="50" width="50" height="400" fill="#111111" stroke="#222222" strokeWidth="1" />
 
-              {Object.entries(zones).map(([id, zone]) => {
-                const level = dangerLevels[id] || 0;
+              {Object.entries(zonesData).map(([id, zone]) => {
+                const level = manualRiskMap[id] || 0;
                 const isDanger = level > 70;
+                const isSelected = selectedZone === id;
+
                 return (
-                  <g key={id}>
+                  <g 
+                    key={id} 
+                    onClick={() => setSelectedZone(isSelected ? null : id)}
+                    style={{ cursor: 'pointer' }}
+                  >
                     <rect
                       x={zone.x} y={zone.y} width={zone.width} height={zone.height}
-                      fill={isDanger ? '#1f0000' : '#1a1a1a'}
-                      stroke={isDanger ? '#ff4444' : '#333333'}
-                      strokeWidth={isDanger ? 3 : 2}
+                      fill={isDanger ? '#1f0000' : isSelected ? '#1a2b1f' : '#1a1a1a'}
+                      stroke={isDanger ? '#ff4444' : isSelected ? '#00ff88' : '#333333'}
+                      strokeWidth={isDanger || isSelected ? 3 : 2}
+                      className="transition-colors duration-300"
                     />
                     <text
                       x={zone.x + zone.width / 2} y={zone.y + zone.height / 2 - 10}
                       textAnchor="middle" dominantBaseline="middle"
-                      className="text-lg font-semibold" fill={isDanger ? '#ff4444' : '#555555'}
+                      className="text-lg font-semibold pointer-events-none" fill={isDanger ? '#ff4444' : isSelected ? '#00ff88' : '#555555'}
                     >
                       {zone.name}
                     </text>
                     <text
                       x={zone.x + zone.width / 2} y={zone.y + zone.height / 2 + 15}
-                      textAnchor="middle" className="text-sm" fill={isDanger ? '#ff4444' : '#555555'}
+                      textAnchor="middle" className="text-sm pointer-events-none" fill={isDanger ? '#ff4444' : '#555555'}
                     >
                       {level}% Threat
                     </text>
 
-                    {/* Sensor dots */}
-                    <circle cx={zone.x + zone.width/2 - 30} cy={zone.y + zone.height/2 + 40} r="6"
-                      fill={isDanger ? '#ff4444' : '#00ff88'} />
-                    <circle cx={zone.x + zone.width/2 + 30} cy={zone.y + zone.height/2 + 40} r="6"
-                      fill={level > 30 ? '#ffaa00' : '#00ff88'} />
+                    <circle cx={zone.x + zone.width/2 - 30} cy={zone.y + zone.height/2 + 40} r="6" fill={isDanger ? '#ff4444' : '#00ff88'} />
+                    <circle cx={zone.x + zone.width/2 + 30} cy={zone.y + zone.height/2 + 40} r="6" fill={level > 30 ? '#ffaa00' : '#00ff88'} />
                   </g>
                 );
               })}
@@ -165,35 +162,25 @@ export function EvacuationPathsMap() {
               {exits.map((exit) => (
                 <g key={exit.id}>
                   <rect
-                    x={exit.x} y={exit.y}
-                    width={exit.width} height={exit.height}
-                    fill="#0a1f0f"
-                    stroke="#00ff88"
-                    strokeWidth="2"
+                    x={exit.x} y={exit.y} width={exit.width} height={exit.height}
+                    fill="#0a1f0f" stroke="#00ff88" strokeWidth="2"
                   />
                   <text
                     x={exit.id === 'exitLeft' ? exit.x - 10 : exit.x + exit.width / 2}
                     y={exit.id === 'exitLeft' ? exit.y + exit.height / 2 : (exit.id === 'exitTop' ? exit.y - 10 : exit.y + exit.height + 15)}
                     textAnchor={exit.id === 'exitLeft' ? "end" : "middle"}
-                    dominantBaseline="middle"
-                    className="text-xs font-semibold uppercase"
-                    fill="#00ff88"
+                    dominantBaseline="middle" className="text-xs font-semibold uppercase" fill="#00ff88"
                   >
                     {exit.label}
                   </text>
                 </g>
               ))}
 
-              {Object.keys(zones).map((zoneId) => (
+              {(selectedZone ? [selectedZone] : Object.keys(zonesData)).map((zoneId) => (
                 <path
                   key={`path-${zoneId}`}
                   d={getEvacuationPath(zoneId)}
-                  stroke="#00ff88"
-                  strokeWidth="2"
-                  strokeDasharray="8 4"
-                  fill="none"
-                  opacity="0.7"
-                  strokeLinecap="round"
+                  stroke="#00ff88" strokeWidth="3" strokeDasharray="8 4" fill="none" opacity="0.8" strokeLinecap="round"
                   style={{ animation: 'dash 1.5s linear infinite' }}
                 />
               ))}
@@ -202,30 +189,78 @@ export function EvacuationPathsMap() {
         </div>
 
         {/* Info panel */}
-        <div className="bg-[#141414] border border-[#222222] rounded-xl p-5">
-          <h3 className="text-lg font-semibold text-[#f0f0f0] mb-4">Zone Status</h3>
-          <div className="space-y-3">
-            {Object.entries(zones).map(([id, zone]) => {
-              const level = dangerLevels[id] || 0;
-              const isDanger = level > 70;
-              return (
-                <div key={id} className={`bg-[#0f0f0f] border rounded-lg p-3 ${isDanger ? 'border-[#ff4444]/30' : 'border-[#222222]'}`}>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-semibold text-[#f0f0f0]">{zone.name}</span>
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium uppercase tracking-wide ${
-                      isDanger
-                        ? 'bg-[#ff4444]/10 text-[#ff4444] border border-[#ff4444]/20'
-                        : level > 30
-                        ? 'bg-[#ffaa00]/10 text-[#ffaa00] border border-[#ffaa00]/20'
-                        : 'bg-[#00ff88]/10 text-[#00ff88] border border-[#00ff88]/20'
-                    }`}>
-                      {isDanger ? 'DANGER' : level > 30 ? 'WARNING' : 'SAFE'}
-                    </span>
-                  </div>
-                  <p className="text-sm text-[#888888]">Threat Level: {level}%</p>
-                </div>
-              );
-            })}
+        <div className="bg-[#141414] border border-[#222222] rounded-xl p-5 flex flex-col">
+          <h3 className="text-lg font-semibold text-[#f0f0f0] mb-4">Simulation Panel</h3>
+
+          <div className="flex-1 space-y-4">
+            <div className="text-sm text-[#888888] bg-[#0f0f0f] p-3 rounded-lg border border-[#222222]">
+              Select a zone to act as the ignition point.
+            </div>
+
+            {/* Zone Selector */}
+            <div className="space-y-2">
+              <label className="text-xs font-medium text-[#555555] uppercase">Ignition Node</label>
+              <select
+                value={selectedZone || ''}
+                onChange={e => setSelectedZone(e.target.value || null)}
+                className="w-full bg-[#0f0f0f] border border-[#333333] text-[#f0f0f0] rounded-lg px-3 py-2 text-sm focus:border-[#00ff88] outline-none"
+              >
+                <option value="">-- Select a Zone --</option>
+                {Object.entries(zonesData).map(([id, zone]) => (
+                  <option key={id} value={id}>{zone.name}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Simulation controls */}
+            {selectedZone && (
+              <div className="pt-4 border-t border-[#222222] space-y-3">
+                {!hasSimulated ? (
+                  <button
+                    onClick={() => startSimulation(selectedZone)}
+                    className="w-full py-2.5 rounded-lg text-sm font-bold bg-[#ff4444] text-white hover:bg-[#e03c3c] transition-colors"
+                  >
+                    Ignite Fire
+                  </button>
+                ) : (
+                  <>
+                    <div className="flex gap-2">
+                      {isSimulating ? (
+                        <button
+                          onClick={pauseSimulation}
+                          className="flex-1 py-2 rounded-lg text-sm font-semibold bg-[#333333] text-[#f0f0f0] hover:bg-[#444444]"
+                        >
+                          Pause
+                        </button>
+                      ) : simulationStep < 8 ? (
+                        <button
+                          onClick={resumeSimulation}
+                          className="flex-1 py-2 rounded-lg text-sm font-semibold bg-[#00ff88] text-black hover:bg-[#00cc6a]"
+                        >
+                          Resume
+                        </button>
+                      ) : null}
+                    </div>
+                  </>
+                )}
+                
+                {hasSimulated && (!isSimulating || simulationStep >= 8) && (
+                  <button
+                    onClick={resetToNormal}
+                    className="w-full py-2 rounded-lg text-sm font-bold border border-[#00ff88] text-[#00ff88] hover:bg-[#00ff88]/10 transition-colors"
+                  >
+                    Reset System
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+          
+          <div className="mt-6 pt-4 border-t border-[#222222]">
+            <p className="text-xs text-[#555555]">
+              Step: {simulationStep} / 8 <br/>
+              Status: {isSimulating ? 'Simulating...' : hasSimulated ? 'Paused/Ended' : 'Idle'}
+            </p>
           </div>
         </div>
       </div>

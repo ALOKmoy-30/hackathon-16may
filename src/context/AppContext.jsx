@@ -51,17 +51,42 @@ export function AppProvider({ children }) {
     loadData();
   }, [addLogEntry]);
 
+  const acknowledgeAlert = useCallback((id) => {
+    setAlerts(prev => prev.map(a => a.id === id ? { ...a, resolved: true, resolvedAt: new Date().toISOString() } : a));
+  }, []);
+
+  const updateZoneStatus = useCallback((zoneId, status, disabled = false) => {
+    setSensors(prev => prev.map(s => {
+      if (s.zone === zoneId || (s.location === zoneId) || (s.name.includes(zoneId))) {
+        return { 
+          ...s, 
+          status: disabled ? 'INACTIVE' : status,
+          smokeLevel: status === 'DANGER' ? 100 : 0,
+          gasLevel: status === 'DANGER' ? 100 : 0,
+          value: status === 'DANGER' ? 100 : 0,
+          disabled: disabled
+        };
+      }
+      return s;
+    }));
+    addLogEntry({ type: 'info', message: `Zone ${zoneId} status updated to ${disabled ? 'DISABLED' : status}` });
+  }, [addLogEntry]);
+
   const value = {
     alerts,
     addAlert,
     removeAlert,
+    acknowledgeAlert,
     sensors,
     setSensors,
+    updateZoneStatus,
     isConnected,
     setIsConnected,
     systemLog,
+    logs: systemLog,
     addLogEntry,
-    loading
+    loading,
+    userRole: 'admin' // Mock userRole for compatibility
   };
 
   return (
